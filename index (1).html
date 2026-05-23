@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🎬 포스터 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --accent: #FFD600;
+    --accent2: #FF4B4B;
+    --text: #f0f0f0;
+    --muted: #888;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  /* 배경 패턴 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,214,0,0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255,75,75,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  /* 헤더 */
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .header .title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    letter-spacing: -1px;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(255,214,0,0.3);
+    margin-bottom: 4px;
+  }
+
+  .header .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* 진행 표시 */
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+    justify-content: center;
+  }
+
+  .dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid #333;
+    transition: all 0.3s;
+  }
+
+  .dot.done { background: var(--accent); border-color: var(--accent); }
+  .dot.current { background: var(--accent2); border-color: var(--accent2); transform: scale(1.4); }
+  .dot.practice { border-color: #7DF9FF; }
+  .dot.practice.done { background: #7DF9FF; border-color: #7DF9FF; }
+  .dot.practice.current { background: #7DF9FF; border-color: #7DF9FF; }
+  .dot-divider { width: 1px; height: 16px; background: #333; margin: 0 4px; }
+
+  .progress-text {
+    font-size: 13px;
+    color: var(--muted);
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* 퀴즈 카드 */
+  .quiz-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+  }
+
+  /* 이미지 영역 */
+  .image-stage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 420px;
+  }
+
+  .image-panel {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .image-panel:first-child {
+    border-right: 1px solid #2a2a2a;
+  }
+
+  .panel-label {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+
+  .label-anime { color: #7DF9FF; }
+  .label-real  { color: var(--accent); }
+
+  .image-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+
+  .image-panel:hover img { transform: scale(1.03); }
+
+  /* 실제 포스터 패널 - 초기 잠금 상태 */
+  .panel-real {
+    position: relative;
+  }
+
+  .lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 3;
+    transition: opacity 0.6s ease, visibility 0.6s;
+  }
+
+  .lock-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .lock-icon {
+    font-size: 48px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+
+  .lock-text {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* 정보 영역 */
+  .info-area {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .title-area {
+    flex: 1;
+  }
+
+  .q-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .practice-badge {
+    background: rgba(125,249,255,0.12);
+    border: 1px solid rgba(125,249,255,0.35);
+    color: #7DF9FF;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .quiz-card.is-practice {
+    border-color: rgba(125,249,255,0.25);
+    box-shadow: 0 0 0 1px rgba(125,249,255,0.1);
+  }
+
+  .answer-hidden {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 28px;
+    color: #333;
+    letter-spacing: 8px;
+  }
+
+  .answer-text {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+    display: none;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .answer-year {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: none;
+  }
+
+  .hint-text {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 8px;
+    font-style: italic;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* 버튼 영역 */
+  .btn-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+
+  .btn-reveal {
+    background: var(--accent2);
+    color: #fff;
+  }
+  .btn-reveal:hover:not(:disabled) { background: #ff6b6b; }
+
+  .btn-hint {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid #333;
+  }
+  .btn-hint:hover:not(:disabled) { background: #2e2e2e; border-color: #444; }
+
+  .btn-next {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-next:hover { background: #ffe033; }
+
+  /* 네비게이션 */
+  .nav-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 0 0.25rem;
+  }
+
+  .btn-nav {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid #2a2a2a;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-nav:hover:not(:disabled) { background: var(--surface2); border-color: #444; }
+  .btn-nav:disabled { opacity: 0.3; cursor: default; }
+
+  .nav-center {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* 엔딩 화면 */
+  .end-screen {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .end-screen.active { display: block; }
+
+  .end-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 48px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-shadow: 0 0 40px rgba(255,214,0,0.4);
+  }
+
+  .end-sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  /* 반응형 */
+  @media (max-width: 600px) {
+    .image-stage {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .image-panel {
+      height: 240px;
+    }
+    .image-panel:first-child {
+      border-right: none;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .info-area {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 1.25rem;
+    }
+    .btn-area {
+      flex-direction: row;
+      width: 100%;
+    }
+    .btn { flex: 1; padding: 10px 12px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="title">🎬 포스터 퀴즈</div>
+    <div class="subtitle">Anime vs Real — 이 작품은 무엇일까요?</div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="dots" id="dots"></div>
+    <div class="progress-text" id="prog-text">연습 1 / 2</div>
+  </div>
+
+  <div class="quiz-card" id="quiz-card">
+    <div class="image-stage">
+      <!-- 애니 포스터 -->
+      <div class="image-panel">
+        <div class="panel-label label-anime">✦ Anime Ver.</div>
+        <img id="img-anime" src="pictures/q1_anime.jpg" alt="애니메이션 포스터" />
+      </div>
+      <!-- 실제 포스터 -->
+      <div class="image-panel panel-real">
+        <div class="panel-label label-real">★ Real Poster</div>
+        <img id="img-real" src="pictures/q1_real.jpg" alt="실제 포스터" />
+        <div class="lock-overlay" id="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-text">정답 공개 후 확인 가능</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-area">
+      <div class="title-area">
+        <div class="q-label" id="q-label">문제 1</div>
+        <div class="answer-hidden" id="ans-hidden">? ? ? ? ?</div>
+        <div class="answer-text" id="ans-text"></div>
+      </div>
+      <div class="btn-area">
+        <button class="btn btn-reveal" id="btn-reveal" onclick="revealAnswer()">정답 공개 🔓</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-area">
+    <button class="btn-nav" id="btn-prev" onclick="prevQ()" disabled>← 이전</button>
+    <div class="nav-center" id="nav-center"></div>
+    <button class="btn-nav" id="btn-next" onclick="nextQ()">다음 →</button>
+  </div>
+
+  <div class="end-screen" id="end-screen">
+    <div class="end-title">🎉 완료!</div>
+    <div class="end-sub">연습 2문제 + 본문제 9문제, 총 11문제 완료! 수고하셨습니다!</div>
+    <button class="btn btn-next" style="padding:14px 40px;font-size:16px;" onclick="restart()">처음으로 돌아가기</button>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+// 👇 여기에 문제 정보를 입력하세요
+// practice: true = 연습문제 / false(또는 없음) = 본문제
+// =============================================
+const questions = [
+  // ── 연습문제 ──
+  { practice: true,  title: "왕과 사는 남자",                       anime: "pictures/p1_anime.png", real: "pictures/p1_real.png" },
+  { practice: true,  title: "재벌집 막내아들",                      anime: "pictures/p2_anime.png", real: "pictures/p2_real.png" },
+  // ── 본문제 ──
+  {                  title: "미스터 션샤인",                        anime: "pictures/q1_anime.png", real: "pictures/q1_real.png" },
+  {                  title: "극한직업",                             anime: "pictures/q2_anime.png", real: "pictures/q2_real.png" },
+  {                  title: "부산행",                               anime: "pictures/q3_anime.png", real: "pictures/q3_real.png" },
+  {                  title: "비밀의 숲 2",                          anime: "pictures/q4_anime.png", real: "pictures/q4_real.png" },
+  {                  title: "허수아비",                             anime: "pictures/q5_anime.png", real: "pictures/q5_real.png" },
+  {                  title: "언젠가는 슬기로울 전공의생활",          anime: "pictures/q6_anime.png", real: "pictures/q6_real.png" },
+  {                  title: "2012",                                 anime: "pictures/q7_anime.jpg", real: "pictures/q7_real.jpg" },
+  {                  title: "인셉션",                               anime: "pictures/q8_anime.png", real: "pictures/q8_real.png" },
+  {                  title: "모두가 자신의 무가치함과 싸우고 있다",  anime: "pictures/q9_anime.png", real: "pictures/q9_real.jpg"  },
+];
+// =============================================
+
+const PRACTICE_COUNT = questions.filter(q => q.practice).length; // 2
+let cur = 0;
+const state = questions.map(() => ({ revealed: false, hinted: false }));
+
+function buildDots() {
+  const el = document.getElementById('dots');
+  el.innerHTML = '';
+  questions.forEach((q, i) => {
+    if (i === PRACTICE_COUNT) {
+      const div = document.createElement('div');
+      div.className = 'dot-divider';
+      el.appendChild(div);
+    }
+    const d = document.createElement('div');
+    const isPractice = q.practice ? ' practice' : '';
+    const isDone    = i < cur ? ' done' : '';
+    const isCur     = i === cur ? ' current' : '';
+    d.className = 'dot' + isPractice + isDone + isCur;
+    el.appendChild(d);
+  });
+}
+
+function getQLabel(i) {
+  const q = questions[i];
+  if (q.practice) {
+    const pIdx = questions.slice(0, i+1).filter(x => x.practice).length;
+    return { text: '연습 ' + pIdx, badge: true };
+  } else {
+    const qIdx = questions.slice(0, i+1).filter(x => !x.practice).length;
+    return { text: '문제 ' + qIdx, badge: false };
+  }
+}
+
+function getProgText(i) {
+  const q = questions[i];
+  if (q.practice) {
+    const pIdx = questions.slice(0, i+1).filter(x => x.practice).length;
+    return '연습 ' + pIdx + ' / ' + PRACTICE_COUNT;
+  } else {
+    const qIdx = questions.slice(0, i+1).filter(x => !x.practice).length;
+    const total = questions.filter(x => !x.practice).length;
+    return '문제 ' + qIdx + ' / ' + total;
+  }
+}
+
+function loadQ() {
+  const q = questions[cur];
+  const s = state[cur];
+
+  document.getElementById('img-anime').src = q.anime;
+  document.getElementById('img-real').src  = q.real;
+
+  // 연습/본문제 카드 스타일
+  const card = document.getElementById('quiz-card');
+  card.className = 'quiz-card' + (q.practice ? ' is-practice' : '');
+
+  // 문제 라벨
+  const labelInfo = getQLabel(cur);
+  const labelEl = document.getElementById('q-label');
+  labelEl.innerHTML = labelInfo.text + (labelInfo.badge ? ' <span class="practice-badge">PRACTICE</span>' : '');
+
+  const progStr = getProgText(cur);
+  document.getElementById('prog-text').textContent = progStr;
+  document.getElementById('nav-center').textContent = progStr;
+
+  if (s.revealed) {
+    document.getElementById('ans-hidden').style.display = 'none';
+    document.getElementById('ans-text').style.display = 'block';
+    document.getElementById('ans-text').textContent = q.title;
+    document.getElementById('lock-overlay').classList.add('hidden');
+    document.getElementById('btn-reveal').disabled = true;
+  } else {
+    document.getElementById('ans-hidden').style.display = 'block';
+    document.getElementById('ans-text').style.display = 'none';
+    document.getElementById('lock-overlay').classList.remove('hidden');
+    document.getElementById('btn-reveal').disabled = false;
+  }
+
+  document.getElementById('btn-prev').disabled = (cur === 0);
+  document.getElementById('btn-next').disabled = (cur === questions.length - 1);
+
+  buildDots();
+}
+
+function revealAnswer() {
+  state[cur].revealed = true;
+  const q = questions[cur];
+  document.getElementById('ans-hidden').style.display = 'none';
+  document.getElementById('ans-text').style.display = 'block';
+  document.getElementById('ans-text').textContent = q.title;
+  document.getElementById('lock-overlay').classList.add('hidden');
+  document.getElementById('btn-reveal').disabled = true;
+}
+
+function showHint() {}
+
+function nextQ() {
+  if (cur < questions.length - 1) {
+    cur++;
+    loadQ();
+  } else {
+    document.getElementById('quiz-card').style.display = 'none';
+    document.getElementById('nav-area') && (document.querySelector('.nav-area').style.display = 'none');
+    document.getElementById('end-screen').classList.add('active');
+  }
+}
+
+function prevQ() {
+  if (cur > 0) { cur--; loadQ(); }
+}
+
+function restart() {
+  cur = 0;
+  state.forEach(s => { s.revealed = false; s.hinted = false; });
+  document.getElementById('quiz-card').style.display = '';
+  document.querySelector('.nav-area').style.display = '';
+  document.getElementById('end-screen').classList.remove('active');
+  loadQ();
+}
+
+loadQ();
+</script>
+</body>
+</html>
