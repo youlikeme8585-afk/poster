@@ -413,7 +413,10 @@
   <div class="header">
     <div class="title">🎬 포스터 퀴즈</div>
     <div class="subtitle">Anime vs Real — 이 작품은 무엇일까요?</div>
+    <button id="bgm-btn" onclick="toggleBGM()" style="margin-top:10px;background:#242424;border:1px solid #444;color:#f0f0f0;padding:7px 18px;border-radius:8px;font-family:'Noto Sans KR',sans-serif;font-size:13px;cursor:pointer;">🔇 음악 켜기</button>
   </div>
+
+  <audio id="bgm" src="Pictures/sonican-flash-quiz-loop-236356.mp3" loop></audio>
 
   <div class="progress-bar">
     <div class="dots" id="dots"></div>
@@ -607,6 +610,18 @@ function restart() {
 }
 
 loadQ();
+
+function toggleBGM() {
+  const bgm = document.getElementById('bgm');
+  const btn = document.getElementById('bgm-btn');
+  if (bgm.paused) {
+    bgm.play();
+    btn.textContent = '🔊 음악 끄기';
+  } else {
+    bgm.pause();
+    btn.textContent = '🔇 음악 켜기';
+  }
+}
 </script>
 </body>
 </html>
