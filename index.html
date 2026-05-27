@@ -31,7 +31,6 @@
     padding: 2rem 1rem;
   }
 
-  /* 배경 패턴 */
   body::before {
     content: '';
     position: fixed;
@@ -47,18 +46,17 @@
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 900px;
+    max-width: 600px;
   }
 
-  /* 헤더 */
   .header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .header .title {
     font-family: 'Black Han Sans', sans-serif;
-    font-size: clamp(28px, 5vw, 48px);
+    font-size: clamp(24px, 5vw, 42px);
     letter-spacing: -1px;
     color: var(--accent);
     text-shadow: 0 0 40px rgba(255,214,0,0.3);
@@ -66,35 +64,29 @@
   }
 
   .header .subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted);
     letter-spacing: 2px;
     text-transform: uppercase;
   }
 
-  /* 진행 표시 */
   .progress-bar {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.2rem;
     justify-content: center;
   }
 
-  .dots {
-    display: flex;
-    gap: 8px;
-  }
+  .dots { display: flex; gap: 8px; }
 
   .dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--surface2);
     border: 1px solid #333;
     transition: all 0.3s;
   }
-
   .dot.done { background: var(--accent); border-color: var(--accent); }
   .dot.current { background: var(--accent2); border-color: var(--accent2); transform: scale(1.4); }
   .dot.practice { border-color: #7DF9FF; }
@@ -102,12 +94,7 @@
   .dot.practice.current { background: #7DF9FF; border-color: #7DF9FF; }
   .dot-divider { width: 1px; height: 16px; background: #333; margin: 0 4px; }
 
-  .progress-text {
-    font-size: 13px;
-    color: var(--muted);
-    min-width: 60px;
-    text-align: right;
-  }
+  .progress-text { font-size: 13px; color: var(--muted); min-width: 60px; text-align: right; }
 
   /* 퀴즈 카드 */
   .quiz-card {
@@ -117,24 +104,40 @@
     overflow: hidden;
   }
 
-  /* 이미지 영역 */
+  .quiz-card.is-practice { border-color: rgba(125,249,255,0.25); }
+
+  /* 이미지 영역 - 한 장씩 */
   .image-stage {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    min-height: 420px;
-  }
-
-  .image-panel {
     position: relative;
+    width: 100%;
+    height: 480px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    background: #111;
   }
 
-  .image-panel:first-child {
-    border-right: 1px solid #2a2a2a;
+  .poster-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease, transform 0.5s ease;
   }
+
+  .poster-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* 애니 슬라이드: 기본 보임 */
+  .slide-anime { opacity: 1; transform: translateX(0); }
+  .slide-anime.exit { opacity: 0; transform: translateX(-60px); }
+
+  /* 실제 슬라이드: 기본 숨김 */
+  .slide-real { opacity: 0; transform: translateX(60px); }
+  .slide-real.enter { opacity: 1; transform: translateX(0); }
 
   .panel-label {
     position: absolute;
@@ -151,62 +154,12 @@
     text-transform: uppercase;
     z-index: 2;
   }
-
   .label-anime { color: #7DF9FF; }
   .label-real  { color: var(--accent); }
 
-  .image-panel img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.6s ease;
-  }
-
-  .image-panel:hover img { transform: scale(1.03); }
-
-  /* 실제 포스터 패널 - 초기 잠금 상태 */
-  .panel-real {
-    position: relative;
-  }
-
-  .lock-overlay {
-    position: absolute;
-    inset: 0;
-    background: #0d0d0d;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    z-index: 3;
-    transition: opacity 1.2s ease, visibility 1.2s;
-  }
-
-  .lock-overlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .lock-icon {
-    font-size: 48px;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(1.1); opacity: 1; }
-  }
-
-  .lock-text {
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-
   /* 정보 영역 */
   .info-area {
-    padding: 1.5rem 2rem;
+    padding: 1.25rem 1.5rem;
     border-top: 1px solid #2a2a2a;
     display: flex;
     align-items: center;
@@ -214,9 +167,7 @@
     gap: 1rem;
   }
 
-  .title-area {
-    flex: 1;
-  }
+  .title-area { flex: 1; }
 
   .q-label {
     font-size: 11px;
@@ -240,62 +191,30 @@
     border-radius: 4px;
   }
 
-  .quiz-card.is-practice {
-    border-color: rgba(125,249,255,0.25);
-    box-shadow: 0 0 0 1px rgba(125,249,255,0.1);
-  }
-
   .answer-hidden {
     font-family: 'Black Han Sans', sans-serif;
-    font-size: 28px;
+    font-size: 26px;
     color: #333;
     letter-spacing: 8px;
   }
 
   .answer-text {
     font-family: 'Black Han Sans', sans-serif;
-    font-size: 28px;
+    font-size: 26px;
     color: var(--accent);
     display: none;
     animation: slideUp 0.4s ease;
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .answer-year {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 4px;
-    display: none;
-  }
-
-  .hint-text {
-    font-size: 13px;
-    color: #aaa;
-    margin-top: 8px;
-    font-style: italic;
-    display: none;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  /* 버튼 영역 */
-  .btn-area {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex-shrink: 0;
-  }
+  .btn-area { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
 
   .btn {
-    padding: 10px 22px;
+    padding: 10px 20px;
     border-radius: 10px;
     border: none;
     font-family: 'Noto Sans KR', sans-serif;
@@ -305,35 +224,21 @@
     transition: all 0.2s;
     white-space: nowrap;
   }
-
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.35; cursor: default; transform: none; }
 
-  .btn-reveal {
-    background: var(--accent2);
-    color: #fff;
-  }
+  .btn-reveal { background: var(--accent2); color: #fff; }
   .btn-reveal:hover:not(:disabled) { background: #ff6b6b; }
 
-  .btn-hint {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid #333;
-  }
-  .btn-hint:hover:not(:disabled) { background: #2e2e2e; border-color: #444; }
-
-  .btn-next {
-    background: var(--accent);
-    color: #000;
-  }
-  .btn-next:hover { background: #ffe033; }
+  .btn-next-q { background: var(--accent); color: #000; }
+  .btn-next-q:hover { background: #ffe033; }
 
   /* 네비게이션 */
   .nav-area {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1.5rem;
+    margin-top: 1.2rem;
     padding: 0 0.25rem;
   }
 
@@ -351,21 +256,11 @@
   .btn-nav:hover:not(:disabled) { background: var(--surface2); border-color: #444; }
   .btn-nav:disabled { opacity: 0.3; cursor: default; }
 
-  .nav-center {
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
+  .nav-center { font-size: 13px; color: var(--muted); letter-spacing: 1px; }
 
-  /* 엔딩 화면 */
-  .end-screen {
-    display: none;
-    text-align: center;
-    padding: 4rem 2rem;
-  }
-
+  /* 엔딩 */
+  .end-screen { display: none; text-align: center; padding: 4rem 2rem; }
   .end-screen.active { display: block; }
-
   .end-title {
     font-family: 'Black Han Sans', sans-serif;
     font-size: 48px;
@@ -373,36 +268,13 @@
     margin-bottom: 12px;
     text-shadow: 0 0 40px rgba(255,214,0,0.4);
   }
+  .end-sub { font-size: 16px; color: var(--muted); margin-bottom: 1.5rem; }
 
-  .end-sub {
-    font-size: 16px;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
-
-  /* 반응형 */
   @media (max-width: 600px) {
-    .image-stage {
-      grid-template-columns: 1fr;
-      min-height: auto;
-    }
-    .image-panel {
-      height: 240px;
-    }
-    .image-panel:first-child {
-      border-right: none;
-      border-bottom: 1px solid #2a2a2a;
-    }
-    .info-area {
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 1.25rem;
-    }
-    .btn-area {
-      flex-direction: row;
-      width: 100%;
-    }
-    .btn { flex: 1; padding: 10px 12px; font-size: 13px; }
+    .image-stage { height: 320px; }
+    .info-area { flex-direction: column; align-items: flex-start; padding: 1rem; }
+    .btn-area { flex-direction: row; width: 100%; }
+    .btn { flex: 1; font-size: 13px; }
   }
 </style>
 </head>
@@ -425,19 +297,15 @@
 
   <div class="quiz-card" id="quiz-card">
     <div class="image-stage">
-      <!-- 애니 포스터 -->
-      <div class="image-panel">
+      <!-- 애니 슬라이드 -->
+      <div class="poster-slide slide-anime" id="slide-anime">
         <div class="panel-label label-anime">✦ Anime Ver.</div>
-        <img id="img-anime" src="Pictures/q1_anime.jpg" alt="애니메이션 포스터" />
+        <img id="img-anime" src="" alt="애니메이션 포스터" />
       </div>
-      <!-- 실제 포스터 -->
-      <div class="image-panel panel-real">
+      <!-- 실제 포스터 슬라이드 -->
+      <div class="poster-slide slide-real" id="slide-real">
         <div class="panel-label label-real">★ Real Poster</div>
-        <img id="img-real" src="Pictures/q1_real.jpg" alt="실제 포스터" />
-        <div class="lock-overlay" id="lock-overlay">
-          <div class="lock-icon">🔒</div>
-          <div class="lock-text">정답 공개 후 확인 가능</div>
-        </div>
+        <img id="img-real" src="" alt="실제 포스터" />
       </div>
     </div>
 
@@ -462,36 +330,29 @@
   <div class="end-screen" id="end-screen">
     <div class="end-title">🎉 완료!</div>
     <div class="end-sub">연습 2문제 + 본문제 9문제, 총 11문제 완료! 수고하셨습니다!</div>
-    <button class="btn btn-next" style="padding:14px 40px;font-size:16px;" onclick="restart()">처음으로 돌아가기</button>
+    <button class="btn btn-next-q" style="padding:14px 40px;font-size:16px;" onclick="restart()">처음으로 돌아가기</button>
   </div>
 
 </div>
 
 <script>
-// =============================================
-// 👇 여기에 문제 정보를 입력하세요
-// practice: true = 연습문제 / false(또는 없음) = 본문제
-// =============================================
 const questions = [
-  // ── 연습문제 ──
-  { practice: true,  title: "왕과 사는 남자",                       anime: "Pictures/p1_anime.png", real: "Pictures/p1_real.png" },
-  { practice: true,  title: "재벌집 막내아들",                      anime: "Pictures/p2_anime.png", real: "Pictures/p2_real.png" },
-  // ── 본문제 ──
-  {                  title: "미스터 션샤인",                        anime: "Pictures/q1_anime.png", real: "Pictures/q1_real.png" },
-  {                  title: "극한직업",                             anime: "Pictures/q2_anime.png", real: "Pictures/q2_real.png" },
-  {                  title: "부산행",                               anime: "Pictures/q3_anime.png", real: "Pictures/q3_real.png" },
-  {                  title: "비밀의 숲 2",                          anime: "Pictures/q4_anime.png", real: "Pictures/q4_real.png" },
-  {                  title: "허수아비",                             anime: "Pictures/q5_anime.png", real: "Pictures/q5_real.png" },
-  {                  title: "언젠가는 슬기로울 전공의생활",          anime: "Pictures/q6_anime.png", real: "Pictures/q6_real.png" },
-  {                  title: "2012",                                 anime: "Pictures/q7_anime.jpg", real: "Pictures/q7_real.jpg" },
-  {                  title: "인셉션",                               anime: "Pictures/q8_anime.png", real: "Pictures/q8_real.png" },
-  {                  title: "모두가 자신의 무가치함과 싸우고 있다",  anime: "Pictures/q9_anime.png", real: "Pictures/q9_real.jpg"  },
+  { practice: true,  title: "왕과 사는 남자",                      anime: "Pictures/p1_anime.png", real: "Pictures/p1_real.png" },
+  { practice: true,  title: "재벌집 막내아들",                     anime: "Pictures/p2_anime.png", real: "Pictures/p2_real.png" },
+  {                  title: "미스터 션샤인",                       anime: "Pictures/q1_anime.png", real: "Pictures/q1_real.png" },
+  {                  title: "극한직업",                            anime: "Pictures/q2_anime.png", real: "Pictures/q2_real.png" },
+  {                  title: "부산행",                              anime: "Pictures/q3_anime.png", real: "Pictures/q3_real.png" },
+  {                  title: "비밀의 숲 2",                         anime: "Pictures/q4_anime.png", real: "Pictures/q4_real.png" },
+  {                  title: "허수아비",                            anime: "Pictures/q5_anime.png", real: "Pictures/q5_real.png" },
+  {                  title: "언젠가는 슬기로울 전공의생활",         anime: "Pictures/q6_anime.png", real: "Pictures/q6_real.png" },
+  {                  title: "2012",                                anime: "Pictures/q7_anime.jpg", real: "Pictures/q7_real.jpg" },
+  {                  title: "인셉션",                              anime: "Pictures/q8_anime.png", real: "Pictures/q8_real.png" },
+  {                  title: "모두가 자신의 무가치함과 싸우고 있다", anime: "Pictures/q9_anime.png", real: "Pictures/q9_real.jpg"  },
 ];
-// =============================================
 
-const PRACTICE_COUNT = questions.filter(q => q.practice).length; // 2
+const PRACTICE_COUNT = questions.filter(q => q.practice).length;
 let cur = 0;
-const state = questions.map(() => ({ revealed: false, hinted: false }));
+const state = questions.map(() => ({ revealed: false }));
 
 function buildDots() {
   const el = document.getElementById('dots');
@@ -504,8 +365,8 @@ function buildDots() {
     }
     const d = document.createElement('div');
     const isPractice = q.practice ? ' practice' : '';
-    const isDone    = i < cur ? ' done' : '';
-    const isCur     = i === cur ? ' current' : '';
+    const isDone = i < cur ? ' done' : '';
+    const isCur  = i === cur ? ' current' : '';
     d.className = 'dot' + isPractice + isDone + isCur;
     el.appendChild(d);
   });
@@ -538,62 +399,66 @@ function loadQ() {
   const q = questions[cur];
   const s = state[cur];
 
+  // 이미지 세팅
   document.getElementById('img-anime').src = q.anime;
   document.getElementById('img-real').src  = q.real;
 
-  // 연습/본문제 카드 스타일
-  const card = document.getElementById('quiz-card');
-  card.className = 'quiz-card' + (q.practice ? ' is-practice' : '');
+  // 카드 스타일
+  document.getElementById('quiz-card').className = 'quiz-card' + (q.practice ? ' is-practice' : '');
 
-  // 문제 라벨
+  // 라벨
   const labelInfo = getQLabel(cur);
-  const labelEl = document.getElementById('q-label');
-  labelEl.innerHTML = labelInfo.text + (labelInfo.badge ? ' <span class="practice-badge">PRACTICE</span>' : '');
+  document.getElementById('q-label').innerHTML = labelInfo.text + (labelInfo.badge ? ' <span class="practice-badge">PRACTICE</span>' : '');
 
   const progStr = getProgText(cur);
   document.getElementById('prog-text').textContent = progStr;
   document.getElementById('nav-center').textContent = progStr;
 
+  // 슬라이드 초기화
+  const slideAnime = document.getElementById('slide-anime');
+  const slideReal  = document.getElementById('slide-real');
+
   if (s.revealed) {
+    // 이미 공개된 문제: 바로 정답 화면
+    slideAnime.className = 'poster-slide slide-anime exit';
+    slideReal.className  = 'poster-slide slide-real enter';
     document.getElementById('ans-hidden').style.display = 'none';
-    document.getElementById('ans-text').style.display = 'block';
     document.getElementById('ans-text').textContent = q.title;
-    document.getElementById('lock-overlay').classList.add('hidden');
+    document.getElementById('ans-text').style.display = 'block';
     document.getElementById('btn-reveal').disabled = true;
   } else {
+    // 미공개: 애니 화면
+    slideAnime.className = 'poster-slide slide-anime';
+    slideReal.className  = 'poster-slide slide-real';
     document.getElementById('ans-hidden').style.display = 'block';
     document.getElementById('ans-text').style.display = 'none';
-    document.getElementById('lock-overlay').classList.remove('hidden');
     document.getElementById('btn-reveal').disabled = false;
   }
 
   document.getElementById('btn-prev').disabled = (cur === 0);
   document.getElementById('btn-next').disabled = (cur === questions.length - 1);
-
   buildDots();
 }
 
 function revealAnswer() {
   state[cur].revealed = true;
   const q = questions[cur];
-  const overlay = document.getElementById('lock-overlay');
-  const btnReveal = document.getElementById('btn-reveal');
 
-  // 버튼 즉시 비활성화 (중복 클릭 방지)
-  btnReveal.disabled = true;
+  document.getElementById('btn-reveal').disabled = true;
 
-  // 1단계: 오버레이 fade-out 시작
-  overlay.classList.add('hidden');
+  // 애니 슬라이드 왼쪽으로 퇴장
+  document.getElementById('slide-anime').classList.add('exit');
 
-  // 2단계: fade-out(0.6s) 끝난 후 정답 텍스트 표시
+  // 실제 포스터 오른쪽에서 등장
+  document.getElementById('slide-real').classList.add('enter');
+
+  // 전환 완료 후 정답 텍스트 표시
   setTimeout(() => {
     document.getElementById('ans-hidden').style.display = 'none';
     document.getElementById('ans-text').textContent = q.title;
     document.getElementById('ans-text').style.display = 'block';
-  }, 1300);
+  }, 500);
 }
-
-function showHint() {}
 
 function nextQ() {
   if (cur < questions.length - 1) {
@@ -601,7 +466,7 @@ function nextQ() {
     loadQ();
   } else {
     document.getElementById('quiz-card').style.display = 'none';
-    document.getElementById('nav-area') && (document.querySelector('.nav-area').style.display = 'none');
+    document.querySelector('.nav-area').style.display = 'none';
     document.getElementById('end-screen').classList.add('active');
   }
 }
@@ -612,14 +477,12 @@ function prevQ() {
 
 function restart() {
   cur = 0;
-  state.forEach(s => { s.revealed = false; s.hinted = false; });
+  state.forEach(s => { s.revealed = false; });
   document.getElementById('quiz-card').style.display = '';
   document.querySelector('.nav-area').style.display = '';
   document.getElementById('end-screen').classList.remove('active');
   loadQ();
 }
-
-loadQ();
 
 function toggleBGM() {
   const bgm = document.getElementById('bgm');
@@ -632,6 +495,8 @@ function toggleBGM() {
     btn.textContent = '🔇 음악 켜기';
   }
 }
+
+loadQ();
 </script>
 </body>
 </html>
