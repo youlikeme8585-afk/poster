@@ -180,7 +180,7 @@
     justify-content: center;
     gap: 16px;
     z-index: 3;
-    transition: opacity 0.6s ease, visibility 0.6s;
+    transition: opacity 1.2s ease, visibility 1.2s;
   }
 
   .lock-overlay.hidden {
@@ -590,7 +590,7 @@ function revealAnswer() {
     document.getElementById('ans-hidden').style.display = 'none';
     document.getElementById('ans-text').textContent = q.title;
     document.getElementById('ans-text').style.display = 'block';
-  }, 650);
+  }, 1300);
 }
 
 function showHint() {}
