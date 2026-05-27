@@ -576,11 +576,21 @@ function loadQ() {
 function revealAnswer() {
   state[cur].revealed = true;
   const q = questions[cur];
-  document.getElementById('ans-hidden').style.display = 'none';
-  document.getElementById('ans-text').style.display = 'block';
-  document.getElementById('ans-text').textContent = q.title;
-  document.getElementById('lock-overlay').classList.add('hidden');
-  document.getElementById('btn-reveal').disabled = true;
+  const overlay = document.getElementById('lock-overlay');
+  const btnReveal = document.getElementById('btn-reveal');
+
+  // 버튼 즉시 비활성화 (중복 클릭 방지)
+  btnReveal.disabled = true;
+
+  // 1단계: 오버레이 fade-out 시작
+  overlay.classList.add('hidden');
+
+  // 2단계: fade-out(0.6s) 끝난 후 정답 텍스트 표시
+  setTimeout(() => {
+    document.getElementById('ans-hidden').style.display = 'none';
+    document.getElementById('ans-text').textContent = q.title;
+    document.getElementById('ans-text').style.display = 'block';
+  }, 650);
 }
 
 function showHint() {}
